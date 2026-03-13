@@ -1,0 +1,24 @@
+# Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Juliaup
+if [ -d "$HOME/.juliaup/bin" ]; then
+  export PATH="$HOME/.juliaup/bin:$PATH"
+fi
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+# Neovim
+export PATH="$HOME/bin/nvim-macos-arm64/bin:$PATH"
+
+# Go
+export PATH="$HOME/go/bin:$PATH"
+
+# zoxide
+eval "$(zoxide init zsh)"
+
+# starship
+eval "$(starship init zsh)"

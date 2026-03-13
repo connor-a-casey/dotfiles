@@ -1,20 +1,35 @@
 # Dotfiles
 
-Neovim config as well as Kitty which can be replicated on any Mac. 
+Neovim, Kitty, Zsh, and Tmux config — deployable on any Mac.
 
 ## What's Included
 
 - **nvim/** — Neovim config (init.lua, plugins, keymaps, LSP, etc.)
 - **kitty/** — Kitty terminal config (theme, keybinds, synthwave84)
+- **zsh/** — Zsh config with Starship prompt + Zoxide (smarter `cd`)
+- **tmux/** — Tmux config (vi keys, Ctrl-a prefix, synthwave84 colors)
 
 ## Prerequisites (New Mac)
 
 Install these before or after deploying:
 
-1. **Homebrew** — [brew.sh](https://brew.sh)
-2. **Neovim** — `brew install neovim`
-3. **Kitty** — `brew install --cask kitty`
-4. **JetBrains Mono Nerd Font** — `brew tap homebrew/cask-fonts && brew install --cask font-jetbrains-mono-nerd-font`
+```bash
+# Core
+brew install neovim
+brew install --cask kitty
+
+# Shell & terminal
+brew install zsh starship zoxide tmux
+
+# Font (required for Nerd icons in Kitty & Neovim)
+brew tap homebrew/cask-fonts
+brew install --cask font-jetbrains-mono-nerd-font
+```
+
+One-liner:
+```bash
+brew tap homebrew/cask-fonts && brew install neovim starship zoxide tmux && brew install --cask kitty font-jetbrains-mono-nerd-font
+```
 
 ## Deploy
 
@@ -42,17 +57,14 @@ chmod +x deploy.sh
 
 The script will:
 
-- Create `~/.config/nvim` and `~/.config/kitty` as symlinks to this repo
+- Create symlinks: `~/.config/nvim`, `~/.config/kitty`, `~/.zshrc`, `~/.zprofile`, `~/.tmux.conf`
 - Back up any existing configs (with a timestamp) before overwriting
 
 ## After Deploy
 
 1. **Restart Kitty** — Quit and reopen Kitty (or run `kitty @ set-config reload=true`).
 2. **Open Neovim** — Run `nvim`; it will install plugins via lazy.nvim on first launch.
-3. **Optional:** Add to `~/.zshrc` if you use the optional Kitty scripts:
-   ```bash
-   export DOTFILES="$HOME/Documents/dotfiles"
-   ```
+3. **Quick-access scripts:** Kitty keybinds (`kitty_mod+a>d`, etc.) use `~/github/dotfiles-latest`. On a new Mac, either clone this repo there, or symlink: `ln -sf ~/Documents/dotfiles ~/github/dotfiles-latest` (you’ll need the scripts/ and quick-access-terminal configs from your old setup).
 
 ## Updating Configs
 
@@ -61,9 +73,9 @@ Edit files in this repo. Changes apply immediately since the configs are symlink
 ## Syncing to a New Mac
 
 1. Copy this folder to the new Mac (git clone, USB, iCloud, etc.).
-2. Install prerequisites (Homebrew, Neovim, Kitty, Nerd Font).
+2. Install prerequisites (see above).
 3. Run `./deploy.sh`.
-4. Restart Kitty and open Neovim.
+4. Open a new terminal; restart Kitty; run `nvim` to install plugins.
 
 ## Structure
 
@@ -78,10 +90,16 @@ dotfiles/
 │   └── after/ftplugin/      # File-type specific settings
 ├── kitty/
 │   ├── kitty.conf
+│   ├── session.conf         # startup session (fullscreen, etc.)
 │   ├── themes/
 │   │   └── synthwave84.conf
 │   └── backgrounds/
 │       └── synthwave84-bg.png
+├── zsh/
+│   ├── zshrc                # → ~/.zshrc (Starship, Zoxide, NVM, etc.)
+│   └── zprofile             # → ~/.zprofile
+├── tmux/
+│   └── tmux.conf            # → ~/.tmux.conf
 ├── deploy.sh
 └── README.md
 ```
