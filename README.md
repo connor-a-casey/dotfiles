@@ -1,105 +1,187 @@
 # Dotfiles
 
-Neovim, Kitty, Zsh, and Tmux config — deployable on any Mac.
+Neovim, Kitty, Zsh, and Tmux config — works on **macOS** and **Linux**.
+
+Platform-specific settings live in `zsh/platform/` and `kitty/darwin.conf` / `kitty/linux.conf`. Shared config (Neovim plugins, tmux, synthwave84 theme) is the same on both.
 
 ## What's Included
 
-- **nvim/** — Neovim config (init.lua, plugins, keymaps, LSP, etc.)
-- **kitty/** — Kitty terminal config (theme, keybinds, synthwave84)
-- **zsh/** — Zsh config with Starship prompt + Zoxide (smarter `cd`)
-- **tmux/** — Tmux config (vi keys, Ctrl-a prefix, synthwave84 colors)
+| Path | macOS | Linux |
+|------|-------|-------|
+| **nvim/** | Neovim (lazy.nvim, LSP, keymaps) | Same |
+| **kitty/** | `darwin.conf` — Cmd keybinds, blur, fullscreen | `linux.conf` — Ctrl+Shift+Alt keybinds, maximized |
+| **zsh/** | Starship, Zoxide, Homebrew, standalone Neovim path | Starship, Zoxide, `~/.local/bin` |
+| **tmux/** | Ctrl-a prefix, vi keys, synthwave84 colors | Same |
 
-## Prerequisites (New Mac)
+---
 
-Install these before or after deploying:
+## macOS — New Machine
+
+### Prerequisites
+
+Install [Homebrew](https://brew.sh), then:
 
 ```bash
-# Core
-brew install neovim
-brew install --cask kitty
-
-# Shell & terminal
-brew install zsh starship zoxide tmux
-
-# Font (required for Nerd icons in Kitty & Neovim)
 brew tap homebrew/cask-fonts
-brew install --cask font-jetbrains-mono-nerd-font
+brew install neovim starship zoxide tmux
+brew install --cask kitty font-jetbrains-mono-nerd-font
 ```
 
 One-liner:
+
 ```bash
 brew tap homebrew/cask-fonts && brew install neovim starship zoxide tmux && brew install --cask kitty font-jetbrains-mono-nerd-font
 ```
 
-## Deploy
+### Optional (match your current Mac)
 
-### Option 1: Clone and deploy
+| Tool | Your setup | New Mac option |
+|------|------------|----------------|
+| Neovim | `~/bin/nvim-macos-arm64/bin` on PATH | [Download release](https://github.com/neovim/neovim/releases) or `brew install neovim` and remove that line from `zsh/platform/Darwin.zsh` |
+| NVM | `~/.nvm` | [nvm install script](https://github.com/nvm-sh/nvm) |
+| Go | `~/go/bin` | `brew install go` |
+| Julia | `~/.juliaup/bin` | [juliaup](https://github.com/JuliaLang/juliaup) |
+| `~/.local/bin/env` | uv-style PATH hook | [uv](https://docs.astral.sh/uv/) or remove from `zsh/zshrc` |
+
+### Deploy
 
 ```bash
-# Clone this repo (or copy the folder)
-git clone <your-repo-url> ~/dotfiles
-cd ~/dotfiles
-
-# Run the deploy script
+cd ~/Documents/dotfiles   # or wherever you cloned the repo
 chmod +x deploy.sh
 ./deploy.sh
 ```
 
-### Option 2: Copy folder and deploy
+---
+
+## Linux — New Machine
+
+### Prerequisites
+
+**Debian / Ubuntu:**
 
 ```bash
-# Copy the dotfiles folder to your new Mac (USB, cloud, etc.)
-cd ~/Documents/dotfiles   # or wherever you put it
+sudo apt update
+sudo apt install -y zsh tmux curl git
 
-chmod +x deploy.sh
-./deploy.sh
+# Neovim (use your distro's package or install latest from GitHub)
+sudo apt install -y neovim
+
+# Kitty
+sudo apt install -y kitty
+
+# Starship
+curl -sS https://starship.rs/install.sh | sh
+
+# Zoxide
+curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
+# JetBrains Mono Nerd Font
+mkdir -p ~/.local/share/fonts
+curl -fLo /tmp/JetBrainsMono.zip \
+  https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip
+unzip -o /tmp/JetBrainsMono.zip -d ~/.local/share/fonts/
+fc-cache -fv
 ```
 
-The script will:
+**Fedora:**
 
-- Create symlinks: `~/.config/nvim`, `~/.config/kitty`, `~/.zshrc`, `~/.zprofile`, `~/.tmux.conf`
-- Back up any existing configs (with a timestamp) before overwriting
+```bash
+sudo dnf install -y zsh tmux neovim kitty curl git
+curl -sS https://starship.rs/install.sh | sh
+curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+```
+
+**Arch:**
+
+```bash
+sudo pacman -S zsh tmux neovim kitty starship zoxide git
+yay -S ttf-jetbrains-mono-nerd   # or from AUR
+```
+
+### Deploy
+
+```bash
+cd ~/dotfiles   # or wherever you cloned the repo
+chmod +x deploy-linux.sh deploy.sh
+./deploy-linux.sh
+# or: ./deploy.sh   (auto-detects Linux)
+```
+
+### Linux notes
+
+- Kitty uses **Ctrl+Shift+Alt** as the modifier (instead of Cmd+Option on Mac).
+- Layouts: **Ctrl+Shift+Alt+U/F/O** = tall / fat / stack.
+- Scrollback in nvim: **Ctrl+Shift+Alt+I** (Mac: Cmd+Option+I).
+- Resize panes: **Ctrl+Shift+Alt+Shift+H/J/K/L**.
+- New window/tab: **Ctrl+Shift+N** / **Ctrl+Shift+T**.
+- Background blur is macOS-only and omitted on Linux.
+- Install a Nerd Font and set it in your desktop environment if icons look wrong outside Kitty.
+
+---
+
+## Deploy (both platforms)
+
+`deploy.sh` detects the OS and symlinks the right configs:
+
+| Symlink | Target |
+|---------|--------|
+| `~/.config/nvim` | `nvim/` |
+| `~/.config/kitty/kitty.conf` | `kitty/darwin.conf` or `kitty/linux.conf` |
+| `~/.config/kitty/session.conf` | `kitty/session.darwin.conf` or `kitty/session.linux.conf` |
+| `~/.config/kitty/themes`, `backgrounds`, `images` | shared asset dirs |
+| `~/.zshrc` | `zsh/zshrc` (sources `zsh/platform/Darwin.zsh` or `Linux.zsh`) |
+| `~/.zprofile` | `zsh/zprofile` |
+| `~/.tmux.conf` | `tmux/tmux.conf` |
+
+Existing real files (not symlinks) are backed up with a timestamp before overwriting.
 
 ## After Deploy
 
-1. **Restart Kitty** — Quit and reopen Kitty (or run `kitty @ set-config reload=true`).
-2. **Open Neovim** — Run `nvim`; it will install plugins via lazy.nvim on first launch.
-3. **Quick-access scripts:** Kitty keybinds (`kitty_mod+a>d`, etc.) use `~/github/dotfiles-latest`. On a new Mac, either clone this repo there, or symlink: `ln -sf ~/Documents/dotfiles ~/github/dotfiles-latest` (you’ll need the scripts/ and quick-access-terminal configs from your old setup).
+1. **New terminal** — Starship and Zoxide load from `~/.zshrc`.
+2. **Restart Kitty** — Platform startup session runs automatically.
+3. **Open Neovim** — lazy.nvim installs plugins on first launch.
+
+### Kitty quick-access keybinds (macOS only)
+
+`kitty/darwin.conf` references scripts under `~/github/dotfiles-latest/`. Those are not in this repo. Either symlink this repo there and add the scripts, or remove those `map kitty_mod+a>...` lines.
 
 ## Updating Configs
 
-Edit files in this repo. Changes apply immediately since the configs are symlinked.
+**macOS** — copy live config into the repo:
 
-## Syncing to a New Mac
+```bash
+rsync -a --delete ~/.config/nvim/ ~/Documents/dotfiles/nvim/
+rsync -a ~/.config/kitty/ ~/Documents/dotfiles/kitty/ --exclude='*.bak'
+# Edit zsh/platform/Darwin.zsh for mac-only PATH changes
+```
 
-1. Copy this folder to the new Mac (git clone, USB, iCloud, etc.).
-2. Install prerequisites (see above).
-3. Run `./deploy.sh`.
-4. Open a new terminal; restart Kitty; run `nvim` to install plugins.
+**Linux** — edit `zsh/platform/Linux.zsh`, `kitty/linux.conf`, or shared files directly.
+
+If symlinked via `./deploy.sh`, edits in this repo apply immediately (restart Kitty for kitty.conf changes).
 
 ## Structure
 
 ```
 dotfiles/
-├── nvim/
-│   ├── init.lua
-│   ├── lazy-lock.json
-│   ├── lua/
-│   │   ├── connor/          # Core config, plugins, keymaps
-│   │   └── current-theme.lua
-│   └── after/ftplugin/      # File-type specific settings
+├── nvim/                         # shared
 ├── kitty/
-│   ├── kitty.conf
-│   ├── session.conf         # startup session (fullscreen, etc.)
+│   ├── base.conf                 # shared theme, fonts, cursor
+│   ├── darwin.conf               # macOS keybinds + blur
+│   ├── linux.conf                # Linux keybinds
+│   ├── session.darwin.conf
+│   ├── session.linux.conf
 │   ├── themes/
-│   │   └── synthwave84.conf
 │   └── backgrounds/
-│       └── synthwave84-bg.png
 ├── zsh/
-│   ├── zshrc                # → ~/.zshrc (Starship, Zoxide, NVM, etc.)
-│   └── zprofile             # → ~/.zprofile
-├── tmux/
-│   └── tmux.conf            # → ~/.tmux.conf
-├── deploy.sh
+│   ├── zshrc                     # shared entry (sources platform file)
+│   ├── zprofile
+│   └── platform/
+│       ├── Darwin.zsh            # Homebrew, standalone Neovim
+│       ├── Darwin.zprofile
+│       ├── Linux.zsh
+│       └── Linux.zprofile
+├── tmux/                         # shared
+├── deploy.sh                     # macOS + Linux (auto-detect)
+├── deploy-linux.sh               # Linux wrapper
 └── README.md
 ```

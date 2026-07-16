@@ -1,24 +1,33 @@
-# Homebrew
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Dotfiles root (works when ~/.zshrc is symlinked into this repo)
+export DOTFILES="${DOTFILES:-${${(%):-%x}:A:h:h}}"
+
+# Platform-specific PATH and tools
+platform_file="$DOTFILES/zsh/platform/$(uname -s).zsh"
+[[ -f "$platform_file" ]] && source "$platform_file"
 
 # Juliaup
-if [ -d "$HOME/.juliaup/bin" ]; then
+if [[ -d "$HOME/.juliaup/bin" ]]; then
   export PATH="$HOME/.juliaup/bin:$PATH"
 fi
 
 # NVM
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-
-# Neovim
-export PATH="$HOME/bin/nvim-macos-arm64/bin:$PATH"
+[[ -s "$NVM_DIR/nvm.sh" ]] && . "$NVM_DIR/nvm.sh"
+[[ -s "$NVM_DIR/bash_completion" ]] && . "$NVM_DIR/bash_completion"
 
 # Go
 export PATH="$HOME/go/bin:$PATH"
 
 # zoxide
-eval "$(zoxide init zsh)"
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
 
-# starship
-eval "$(starship init zsh)"
+# Starship
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+# uv / pipx-style env hook
+[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+export PATH="$HOME/.local/bin:$PATH"
